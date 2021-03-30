@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class Editor extends StatelessWidget {
   final TextEditingController controlador;
@@ -20,6 +21,10 @@ class Editor extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: TextField(
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(15),
+
+        ],
         controller: controlador,
         style: TextStyle(
           fontSize: 24,
