@@ -15,8 +15,11 @@ class ItemTransferencia extends StatelessWidget {
     return Card(
       child: ListTile(
         leading: Icon(Icons.monetization_on),
-        title: Text(formataMoeda.format(_transferencia.valor)),
-        subtitle: Text(_transferencia.numeroConta.toString()),
+        //TODO FAZER A FORMATACAO DO VALOR
+        title: Text(_transferencia.toStringValor()),
+        subtitle: Text(_transferencia.toStringConta()),
+        //! title: Text(formataMoeda.format(_transferencia.valor)),
+        //! subtitle: Text(_transferencia.numeroConta.toString()),
       ),
     );
   }

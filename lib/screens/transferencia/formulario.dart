@@ -1,7 +1,9 @@
 import 'package:bytebank/component/editor.dart';
+import 'package:bytebank/models/saldo.dart';
 import 'package:bytebank/models/transferencia.dart';
+import 'package:bytebank/models/transferencias.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_masked_text/flutter_masked_text.dart';
+import 'package:provider/provider.dart';
 
 const String _tituloAppBar = 'Criando Transferência';
 const String _rotuloCampoNumeroConta = 'Número da conta';
@@ -10,16 +12,9 @@ const String _rotuloCampoValor = 'Valor';
 const String _dicaCampoValor = '0.00';
 const String _textoBotaoConfirmar = 'Confirmar';
 
-class FormularioTransferencia extends StatefulWidget {
-  @override
-  _FormularioTransferenciaState createState() =>
-      _FormularioTransferenciaState();
-}
-
-class _FormularioTransferenciaState extends State<FormularioTransferencia> {
+class FormularioTransferencia extends StatelessWidget {
   var _controladorCampoNumeroConta = TextEditingController();
-  var _controladorCampoValor =
-      MoneyMaskedTextController(decimalSeparator: ',', thousandSeparator: '.');
+  var _controladorCampoValor = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +39,7 @@ class _FormularioTransferenciaState extends State<FormularioTransferencia> {
               icone: Icons.monetization_on,
             ),
             RaisedButton(
+              color: Theme.of(context).primaryColor,
               onPressed: () => _criaTransferencia(context),
               child: Text(_textoBotaoConfirmar),
             )
@@ -54,18 +50,38 @@ class _FormularioTransferenciaState extends State<FormularioTransferencia> {
   }
 
   void _criaTransferencia(BuildContext context) {
-    final String valorSemFormatacao = _controladorCampoValor.text;
-    debugPrint('Valor sem formatacao $valorSemFormatacao');
-    var valorFormatado = valorSemFormatacao.replaceAll(',', '.');
-    // final double valor = double.tryParse(_controladorCampoValor.text);
-    debugPrint('valor supostamente formatado $valorFormatado');
-    final double valor = double.tryParse(valorFormatado);
-    debugPrint('valor parseado pra double $valor');
-
+    final double valor = double.tryParse(_controladorCampoValor.text);
     final int numeroConta = int.tryParse(_controladorCampoNumeroConta.text);
-    if (numeroConta != null && valor != null) {
-      final transferenciaRecebida = Transferencia(valor, numeroConta);
-      Navigator.pop(context, transferenciaRecebida);
+
+    final transferenciaValida =
+        _validaTransferencia(context, numeroConta, valor);
+
+    if (transferenciaValida) {
+      final novaTransferencia = Transferencia(valor, numeroConta);
+      _atualizaEstado(context, novaTransferencia, valor);
+      Navigator.pop(context);
     }
+  }
+
+  _validaTransferencia(context, numeroConta, valor) {
+    final _camposPreenchidos = numeroConta != null && valor != null;
+    final _saldoSuficiente = valor <=
+        Provider.of<Saldo>(
+          context,
+          
+          listen: false,
+        ).valor;
+  //TODO APÓS VALIDAR SE PODE FAZER TRANSFERENCIA E NÃO TIVER SALDO
+  //TODO COLOCAR UM DIALOGO DIZENDO QUE SALDO É INSUFICIENTE
+    return _camposPreenchidos && _saldoSuficiente;
+  }
+
+  //? O método atualiza estado além de adicionar uma nova transferencia para outra conta, atualiza o saldo do cliente
+  _atualizaEstado(context, novaTransferencia, valor) {
+    //! O Provider.of<Transferencias> pega a transferencia e atualiza ela na lista
+    //! Sem buildar novamente os componentes visuais
+    Provider.of<Transferencias>(context, listen: false)
+        .adiciona(novaTransferencia);
+    Provider.of<Saldo>(context, listen: false).subtrai(valor);
   }
 }
