@@ -1,7 +1,14 @@
-import 'package:bytebank/screens/transferencia/lista.dart';
+import 'package:bytebank/models/saldo.dart';
+import 'package:bytebank/screens/dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-void main() => runApp(BytebankApp());
+void main() => runApp(
+      ChangeNotifierProvider(
+        create: (context) => Saldo(0),
+        child: BytebankApp(),
+      ),
+    );
 
 class BytebankApp extends StatelessWidget {
   @override
@@ -16,7 +23,7 @@ class BytebankApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: ListaTransferencias(),
+      home: Dashboard(),
     );
   }
 }
